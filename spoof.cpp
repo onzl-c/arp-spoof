@@ -21,7 +21,7 @@ bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac re
 
     int res = pcap_sendpacket(pcap, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
     if (res != 0) {
-        fprintf(stderr, "request sender mac packet return %d error=%s\n", res, pcap_geterr(pcap));
+        fprintf(stderr, "[Error] request sender mac packet return %d error=%s\n", res, pcap_geterr(pcap));
     }
     printf("ARP REQUEST packet from %s to %s\n", myIp, receiverIp);
 
@@ -69,6 +69,6 @@ void arp_attack(pcap_t* handle, const Mac& sender_mac, const Ip& sender_ip, cons
 
     int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
 	if (res != 0) {
-		fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
+		fprintf(stderr, "[Error] pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
 	}
 }
