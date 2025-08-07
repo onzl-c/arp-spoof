@@ -13,7 +13,7 @@
 #include <net/if.h>
 #include <unistd.h>
 
-#include "base//ip.h"
+#include "base/ip.h"
 #include "base/mac.h"
 #include "base/buf.h"
 
