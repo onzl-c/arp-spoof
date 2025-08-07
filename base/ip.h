@@ -29,4 +29,5 @@ struct Ip {
     }
 };
 
-uint32_t getMyIp(const char* interface_name);
+// 외부에서 가져온 코드
+Ip getMyIp(const char* interface_name);

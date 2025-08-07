@@ -42,11 +42,11 @@ Mac& Mac::broadcastMac() {
 }
 
 // 외부에서 가져온 코드
-bool getMyMac(const char* interface_name, uint8_t* mac_addr) {
+Mac getMyMac(const char* interface_name) {
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
         perror("socket");
-        return false;
+        return Mac::nullMac();
     }
 
     struct ifreq ifr;
@@ -55,9 +55,11 @@ bool getMyMac(const char* interface_name, uint8_t* mac_addr) {
     if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
         perror("ioctl(SIOCGIFHWADDR)");
         close(sock);
-        return false;
+        return Mac::nullMac();
     }
     close(sock);
-    memcpy(mac_addr, ifr.ifr_hwaddr.sa_data, 6);
-    return true;
+    
+    Mac myMac;
+    memcpy(myMac.mac_, ifr.ifr_hwaddr.sa_data, Mac::SIZE);
+    return myMac;
 }

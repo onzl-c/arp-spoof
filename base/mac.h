@@ -44,4 +44,5 @@ struct Mac {
     static Mac& broadcastMac();
 };
 
-bool getMyMac(const char* interface_name, uint8_t* mac_addr);
+// 외부에서 가져온 코드
+Mac getMyMac(const char* interface_name);

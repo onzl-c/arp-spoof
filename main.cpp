@@ -1,5 +1,7 @@
 #include "spoof.h"
 
+#define JUMBOBUFSIZ 65535
+
 int main(int argc, char* argv[]) {
     // 1. 인자 개수 검사
     if (argc < 4 || argc % 2 != 0) {
@@ -10,7 +12,7 @@ int main(int argc, char* argv[]) {
     // 2. pcap 핸들 열기
     char* dev = argv[1];
     char errbuf[PCAP_ERRBUF_SIZE];
-    pcap_t* pcap = pcap_open_live(dev, BUFSIZ, 1, 1, errbuf);
+    pcap_t* pcap = pcap_open_live(dev, JUMBOBUFSIZ, 1, 1, errbuf);
     if (pcap == nullptr) {
         fprintf(stderr, "couldn't open device %s(%s)\n", dev, errbuf);
         return -1;
@@ -18,8 +20,8 @@ int main(int argc, char* argv[]) {
     printf("Device %s opened successfully.\n", dev);
 
     // 3. 내 MAC/IP 주소 얻기
-    Mac myMac;
-    if (!getMyMac(dev, myMac.mac_)) {
+    Mac myMac = getMyMac(dev);
+    if (myMac.isNull()) {
         fprintf(stderr, "Failed to get MAC address for %s\n", dev);
         return -1;
     }

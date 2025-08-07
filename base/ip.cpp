@@ -23,7 +23,7 @@ Ip::operator std::string() const {
 }
 
 // 외부에서 가져온 코드
-uint32_t getMyIp(const char* interface_name) {
+Ip getMyIp(const char* interface_name) {
     int fd;
     struct ifreq ifr;
     struct sockaddr_in* addr;
@@ -44,10 +44,7 @@ uint32_t getMyIp(const char* interface_name) {
     }
 
     close(fd);
-
-    // sockaddr_in 구조체로 캐스팅
     addr = (struct sockaddr_in*)&ifr.ifr_addr;
 
-    // in_addr 구조체의 s_addr 멤버(uint32_t)를 바로 반환
-    return addr->sin_addr.s_addr;
+    return Ip(addr->sin_addr.s_addr);
 }
