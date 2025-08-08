@@ -1,24 +1,6 @@
 #include "ip.h"
 #include <cstdlib> // for atoi
 
-Ip::Ip(const string& r) {
-    struct in_addr addr;
-    if (inet_aton(r.c_str(), &addr) == 0) {
-        fprintf(stderr, "Invalid IP address format: %s\n", r.c_str());
-        ip_ = 0;
-        return;
-    }
-    ip_ = addr.s_addr;
-}
-
-Ip::operator string() const {
-    struct in_addr addr;
-    addr.s_addr = ip_;
-    char buf[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &addr, buf, sizeof(buf));
-    return std::string(buf);
-}
-
 // 외부에서 가져온 코드
 Ip getMyIp(const char* interface_name) {
     int fd;

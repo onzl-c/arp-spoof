@@ -1,23 +1,10 @@
 #include "mac.h"
 
-Mac::Mac(const std::string& r) {
-    sscanf(r.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-            &mac_[0], &mac_[1], &mac_[2], &mac_[3], &mac_[4], &mac_[5]);
-}
-
 Mac::operator std::string() const {
     char buf[18];
     sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
             mac_[0], mac_[1], mac_[2], mac_[3], mac_[4], mac_[5]);
     return std::string(buf);
-}
-
-Mac::operator uint64_t() const {
-    uint64_t res = 0;
-    for (int i = 0; i < SIZE; i++) {
-        res = (res << 8) | mac_[i];
-    }
-    return res;
 }
 
 Mac& Mac::nullMac() {

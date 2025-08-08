@@ -9,16 +9,24 @@ struct Mac {
     Mac() {}
     Mac(const Mac& r) { memcpy(this->mac_, r.mac_, SIZE); }
     Mac(const unsigned char* r) { memcpy(this->mac_, r, SIZE); }
-    Mac(const string& r);
-    Mac(const uint64_t& r);
+    Mac(const string& r) {
+        sscanf(r.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+               &mac_[0], &mac_[1], &mac_[2], &mac_[3], &mac_[4], &mac_[5]);
+    }
 
     Mac& operator = (const Mac& r) { memcpy(this->mac_, r.mac_, SIZE); return *this; }
 
     operator uint8_t*() { return mac_; }
     operator const uint8_t*() const { return mac_; }
 
-    explicit operator string() const;
-    explicit operator uint64_t() const;
+    operator string() const {
+        char buf[18];
+        sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
+                mac_[0], mac_[1], mac_[2], mac_[3], mac_[4], mac_[5]);
+        return string(buf);
+    }
+    operator uint8_t*() { return mac_; }
+    operator const uint8_t*() const { return mac_; }
 
 	// comparison operator
 	bool operator == (const Mac& r) const { return memcmp(mac_, r.mac_, SIZE) == 0; }
