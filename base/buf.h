@@ -1,6 +1,6 @@
 #pragma once
 
-#include "eunet.h"
+#include "./eunet.h"
 
 struct Buf {
     size_t size_ = 0;
