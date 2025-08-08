@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
         }
 
         EthHdr* ethHdr = (EthHdr*)packet;
-        if (ethHdr->smac() == myMac) {
+        if (ethHdr->smac() == myMac)
         continue;
 
         for (SpoofEntry entry : entries) {
