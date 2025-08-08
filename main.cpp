@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     // 2. pcap 핸들 열기
     char* dev = argv[1];
     char errbuf[PCAP_ERRBUF_SIZE];
-    pcap_t* pcap = pcap_open_live(dev, JUMBOBUFSIZ, 1, 1, errbuf);
+    pcap_t* pcap = pcap_open_live(dev, JUMBOBUFSIZ, 1, 1000, errbuf);
     if (pcap == nullptr) {
         fprintf(stderr, "[Error] couldn't open device %s(%s)\n", dev, errbuf);
         return -1;
@@ -28,6 +28,11 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     Ip myIp = getMyIp(dev);
+
+    // ============= 디버깅을 위한 출력 추가 =============
+    printf("getMyMac() returned: %s\n", std::string(myMac).c_str());
+    printf("getMyIp()  returned: %s\n", std::string(myIp).c_str());
+    // =================================================
 
     // 4. 스푸핑 쌍 목록 생성
     vector<SpoofEntry> entries;

