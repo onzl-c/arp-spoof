@@ -1,6 +1,11 @@
 #include "spoof.h"
 #include "hdr/etharppacket.h"
 
+void usage() {
+	printf("syntax: send-arp-test <interface> <sender ip> <target ip> [<sender ip 2> <target ip 2> ...]\n");
+	printf("sample: send-arp wlan0 192.168.10.2 192.168.10.1\n");
+}
+
 bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac receiverMac) {
     EthArpPacket packet;
 
@@ -23,7 +28,7 @@ bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac re
     if (res != 0) {
         fprintf(stderr, "[Error] request sender mac packet return %d error=%s\n", res, pcap_geterr(pcap));
     }
-    printf("ARP REQUEST packet from %s to %s\n", myIp, receiverIp);
+    printf("ARP REQUEST packet from %s to %s\n", std::string(myIp).c_str(), std::string(receiverIp).c_str());
 
     while (true) {
         struct pcap_pkthdr* header;

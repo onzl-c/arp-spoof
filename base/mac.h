@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "../eunet.h"
 
 struct Mac {
@@ -9,8 +10,8 @@ struct Mac {
     Mac() {}
     Mac(const Mac& r) { memcpy(this->mac_, r.mac_, SIZE); }
     Mac(const unsigned char* r) { memcpy(this->mac_, r, SIZE); }
-    Mac(const string& r) {
-        sscanf(r.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+    Mac(const char* r) {
+        sscanf(r, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
                &mac_[0], &mac_[1], &mac_[2], &mac_[3], &mac_[4], &mac_[5]);
     }
 
@@ -18,15 +19,12 @@ struct Mac {
 
     operator uint8_t*() { return mac_; }
     operator const uint8_t*() const { return mac_; }
-
-    operator string() const {
+    operator std::string() const {
         char buf[18];
         sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
                 mac_[0], mac_[1], mac_[2], mac_[3], mac_[4], mac_[5]);
-        return string(buf);
+        return std::string(buf);
     }
-    operator uint8_t*() { return mac_; }
-    operator const uint8_t*() const { return mac_; }
 
 	// comparison operator
 	bool operator == (const Mac& r) const { return memcmp(mac_, r.mac_, SIZE) == 0; }

@@ -1,12 +1,5 @@
 #include "mac.h"
 
-Mac::operator std::string() const {
-    char buf[18];
-    sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
-            mac_[0], mac_[1], mac_[2], mac_[3], mac_[4], mac_[5]);
-    return std::string(buf);
-}
-
 Mac& Mac::nullMac() {
     static uint8_t _value[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     static Mac res(_value);
