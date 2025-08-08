@@ -25,7 +25,7 @@ struct Ip {
     }
 
     bool isBroadcast() const {
-        return (ip_ & 0xFF000000) == 0xE0000000;
+        return ip_ == 0xFFFFFFFF;
     }
 };
 

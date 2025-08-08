@@ -14,6 +14,9 @@ struct Mac {
 
     Mac& operator = (const Mac& r) { memcpy(this->mac_, r.mac_, SIZE); return *this; }
 
+    operator uint8_t*() { return mac_; }
+    operator const uint8_t*() const { return mac_; }
+
     explicit operator string() const;
     explicit operator uint64_t() const;
 

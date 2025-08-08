@@ -13,6 +13,7 @@
 #include <net/if.h>
 #include <unistd.h>
 #include <chrono>
+#include <arpa/inet.h>
 
 #include "base/ip.h"
 #include "base/mac.h"

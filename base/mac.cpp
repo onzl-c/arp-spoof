@@ -1,24 +1,15 @@
 #include "mac.h"
 
 Mac::Mac(const std::string& r) {
-    std::string s;
-    for (char ch : r) {
-        if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F'|| (ch >= 'a' && ch <= 'f')))
-            s += ch;
-    }
-    int res = sscanf(s.c_str(), "%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx",
-                    &mac_[0], &mac_[1], &mac_[2], &mac_[3], &mac_[4], &mac_[5]);
-    if (res != SIZE) {
-        std::cerr << "sscanf failed, return " << res << std::endl;
-        memset(mac_, 0, SIZE);
-    }
+    sscanf(r.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+            &mac_[0], &mac_[1], &mac_[2], &mac_[3], &mac_[4], &mac_[5]);
 }
 
 Mac::operator std::string() const {
-    char s[20];
-    sprintf(s, "%02X:%02X:%02X:%02X:%02X:%02X", 
+    char buf[18];
+    sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
             mac_[0], mac_[1], mac_[2], mac_[3], mac_[4], mac_[5]);
-    return std::string(s);
+    return std::string(buf);
 }
 
 Mac::operator uint64_t() const {
