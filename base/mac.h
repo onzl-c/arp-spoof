@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./eunet.h"
+#include "../eunet.h"
 
 struct Mac {
     static constexpr int SIZE = 6;

@@ -1,6 +1,6 @@
 # pragma once
 
-#include "./eunet.h"
+#include "../eunet.h"
 
 #pragma pack(push, 1)
 struct Ip4Hdr {

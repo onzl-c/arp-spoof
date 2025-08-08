@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./eunet.h"
+#include "../eunet.h"
 
 struct Ip {
     static constexpr int SIZE = 4;
