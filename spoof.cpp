@@ -2,8 +2,8 @@
 #include "hdr/etharppacket.h"
 
 void usage() {
-	printf("syntax: send-arp-test <interface> <sender ip> <target ip> [<sender ip 2> <target ip 2> ...]\n");
-	printf("sample: send-arp wlan0 192.168.10.2 192.168.10.1\n");
+	printf("syntax: arp-spoof <interface> <sender ip> <target ip> [<sender ip 2> <target ip 2> ...]\n");
+	printf("sample: arp-spoof wlan0 192.168.10.2 192.168.10.1\n");
 }
 
 bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac receiverMac) {
