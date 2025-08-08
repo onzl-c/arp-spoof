@@ -9,7 +9,7 @@ void usage() {
 bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac& receiverMac) {
     EthArpPacket packet;
 
-    packet.ethHdr_.dmac_ = receiverMac;
+    packet.ethHdr_.dmac_ = Mac("FF:FF:FF:FF:FF:FF");
     packet.ethHdr_.smac_ = myMac;
     packet.ethHdr_.type_ = htons(EthHdr::ARP);
 
@@ -19,8 +19,8 @@ bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac& r
     packet.arpHdr_.plen_ = Ip::SIZE;
     packet.arpHdr_.op_ = htons(ArpHdr::REQUEST);
     packet.arpHdr_.smac_ = myMac;
-    packet.arpHdr_.sip_ = static_cast<uint32_t>(receiverIp);
-    packet.arpHdr_.tmac_ = receiverMac;
+    packet.arpHdr_.sip_ = static_cast<uint32_t>(myIp);
+    packet.arpHdr_.tmac_ = Mac("00:00:00:00:00:00");
     packet.arpHdr_.tip_ = static_cast<uint32_t>(receiverIp); 
 
 
