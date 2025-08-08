@@ -94,6 +94,8 @@ int main(int argc, char* argv[]) {
         }
 
         EthHdr* ethHdr = (EthHdr*)packet;
+        if (ethHdr->smac() == myMac) {
+        continue;
 
         for (SpoofEntry entry : entries) {
             // Sender -> ARP REQUEST(broadcast) 탐지, re-spoofing
