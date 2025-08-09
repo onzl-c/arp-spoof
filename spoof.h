@@ -11,5 +11,5 @@ struct SpoofEntry {
     Mac targetMac;
 };
 
-bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac& receiverMac);
+bool request_and_get_mac(pcap_t* pcap, const Mac& myMac, const Ip& myIp, const Ip& receiverIp, Mac& receiverMac);
 void arp_attack(pcap_t* handle, const Mac& sender_mac, const Ip& sender_ip, const Ip& target_ip, const Mac& my_mac);

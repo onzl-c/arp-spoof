@@ -17,7 +17,7 @@ Ip getMyIp(const char* interface_name) {
     strncpy(ifr.ifr_name, interface_name, IFNAMSIZ - 1);
 
     if (ioctl(fd, SIOCGIFADDR, &ifr) < 0) {
-        perror("ioctl");
+        perror("ioctl(SIOCGIFADDR)");
         close(fd);
         exit(1);
     }

